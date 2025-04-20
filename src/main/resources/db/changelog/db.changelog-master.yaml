@@ -1,0 +1,9 @@
+databaseChangeLog:
+  #Table items
+  - include: { relativeToChangelogFile: true, file: changeset/items/items.yaml }
+
+  #Table orders
+  - include: { relativeToChangelogFile: true, file: changeset/orders/orders.yaml }
+
+  #Table orders_items
+  - include: { relativeToChangelogFile: true, file: changeset/orders_items/orders_items.yaml }

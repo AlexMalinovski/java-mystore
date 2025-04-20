@@ -1,0 +1,14 @@
+databaseChangeLog:
+  #Table
+  - changeSet:
+      id: 000000000001-create-table-items
+      author: Aleksey Malinovsky
+      changes:
+        - createTable:
+            tableName: items
+            columns:
+              - column: { name: id, type: bigint, autoIncrement: true, remarks: 'Артикул внутренний', constraints: { primaryKey: true, nullable: false, primaryKeyName: pk_items} }
+              - column: { name: name, type: varchar(200), remarks: 'Наименование', constraints: { nullable: false } }
+              - column: { name: description, type: text, remarks: 'Описание', constraints: { nullable: false } }
+              - column: { name: price, type: bigint, remarks: 'Цена копеек', constraints: { nullable: false } }
+              - column: { name: img, type: BYTEA, remarks: 'Изображение'}
