@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+    <title>Витрина товаров</title>
+</head>
+
+<body>
+    <!-- В href ссылка на страницу заказов -->
+    <a th:href="@{/orders}" style="float:right;">
+        <b>ЗАКАЗЫ &cudarrr;</b>
+    </a>
+    <!-- В href ссылка на корзину -->
+    <a th:href="@{/cart}" style="float:right;">
+        <b>КОРЗИНА &cudarrr;</b>
+    </a>
+    <table style="width:70%;margin-left:auto;margin-right:auto;">
+        <tr>
+            <td>
+                <form th:object="${mainDto}" th:action="@{/main}" method="POST" enctype="multipart/form-data">
+                    <p>
+                        <label for="search">Найти: </label>
+                        <!-- В value значение со строкой поиска товара, если ничего не ищем, то пустая строка -->
+                        <input id="search" style="width:300px;" name="nameSubstring"  th:field="*{nameSubstring}">
+                        <button name="action" onclick="this.form.submit()">&#128269;</button>
+                    </p>
+                    <p>
+                        <label for="sort">Сортировка: </label>
+                        <select id="sort" name="sort" onchange="this.form.submit()">
+                            <option th:each="sortType : ${availableSorts}" th:value="${sortType.name()}" th:text="${sortType.getDescription()}" th:selected="${sortType == mainDto.getSort()}"></option>
+                        </select>
+                    </p>
+                    <p>
+                        <label for="pageSize">Число товаров: </label>
+                        <select id="pageSize" name="pageSize" onchange="this.form.submit()">
+                            <option th:each="size : ${availableSizes}" th:value="${size}" th:text="${size}" th:selected="${size == mainDto.getPageSize()}"></option>
+                        </select>
+                    </p>
+                    <p>
+                    	<!--
+                    		В if true, если выбрана не первая страница.
+                    		В value номер предыдущей страницы.
+                    	-->
+                        <button th:if="${itemsPage.hasPrevious()}" name="pageNumber" th:value="${itemsPage.getNumber()}">&lt;</button>
+                        <!-- В text номер текущей страницы -->
+                        <span th:text="${'Страница: ' + (itemsPage.getNumber() + 1) +' из ' + itemsPage.getTotalPages()}"></span>
+                        <!--
+                    		В if true, если выбрана не последняя страница.
+                    		В value номер следующей страницы.
+                    	-->
+                        <button th:if="${itemsPage.hasNext()}" name="pageNumber" th:value="${itemsPage.getNumber()+2}">&gt;</button>
+                    </p>
+                </form>
+            </td>
+        </tr>
+    </table>
+
+        <div style="display: grid;  grid-template-columns: repeat(2, 1fr); gap: 60px;">
+            <table th:each="item : ${itemsPage.toList()}">
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <!-- В href ссылка на страницу с карточкой товара -->
+                        <a th:href="@{/items/{itemId}(itemId=${item.getId()})}">
+                            <!-- В src ссылка изображение товара -->
+                            <img width="300" height="300" th:src="'data:image/jpeg;base64,' + ${item.getImg()}" alt="image">
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <!-- В text название товара -->
+                        <b th:text="${item.getName()}"></b>
+                    </td>
+                    <td>
+                        <!-- В text цена товара -->
+                        <b th:text="${item.getPriceView()}"></b>
+                    </td>
+                </tr>
+                <tr>
+                    <!-- В text описание товара -->
+                    <td th:text="${item.getDescription()}"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <!--
+                        В action ссылка на изменение количества товара в корзине.
+                        Передается параметр запроса action=[minus|plus]
+                        -->
+                        <form th:object="${cartAction}" th:action="@{/cart/{itemId}(itemId=${item.getId()})}" method="POST">
+                            <button name="action" value="minus">-</button>
+                            <!-- В text количество товара в корзине -->
+                            <span th:text="${item.getCartCnt()}"></span>
+                            <button name="action" value="plus">+</button>
+                            <!-- В if true, если товар еще не был добавлен в корзину, false, если уже был -->
+                            <button name="action" value="plus" th:if="${item.getCartCnt()} == null or ${item.getCartCnt()} == 0" style="float:right;">В корзину</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+
+
+
+
+
+
+<!--        &lt;!&ndash; В each итерируемся по строке/списку со списками из N (например, трех) товаров &ndash;&gt;-->
+<!--&lt;!&ndash;        <tr th:each="item : ${itemsPage.getContent()}">&ndash;&gt;-->
+<!--        <tr th:each="i: ${#numbers.sequence(0, *{pageSize}-1)}">-->
+<!--            &lt;!&ndash; В each итерируемся товарам в строке/списке из N (например, трех) товаров &ndash;&gt;-->
+<!--            <td th:each="j: ${#numbers.sequence(0, 1)}">-->
+<!--                <table>-->
+<!--                    <tr>-->
+<!--                        <td>-->
+<!--                            &lt;!&ndash; В href ссылка на страницу с карточкой товара &ndash;&gt;-->
+<!--                            <a th:href="...">-->
+<!--                                &lt;!&ndash; В src ссылка изображение товара &ndash;&gt;-->
+<!--                                <img width="300" height="300" th:src="...">-->
+<!--                            </a>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <td>-->
+<!--                            &lt;!&ndash; В text название товара &ndash;&gt;-->
+<!--                            <b th:text="${item.getName()}"></b>-->
+<!--                        </td>-->
+<!--                        <td>-->
+<!--                       	    &lt;!&ndash; В text цена товара &ndash;&gt;-->
+<!--                            <b th:text="${item.getPrice()}"></b>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        &lt;!&ndash; В text описание товара &ndash;&gt;-->
+<!--                        <td th:text="${item.getDescription()}"></td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <td>-->
+<!--                            &lt;!&ndash;-->
+<!--                    		В action ссылка на изменение количества товара в корзине.-->
+<!--                    		Передается параметр запроса action=[minus|plus]-->
+<!--                    	    &ndash;&gt;-->
+<!--&lt;!&ndash;                            <form th:action="..." method="post">&ndash;&gt;-->
+<!--&lt;!&ndash;                                <button name="action" value="minus">-</button>&ndash;&gt;-->
+<!--&lt;!&ndash;                                &lt;!&ndash; В text количество товара в корзине &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                                <span th:text="..."></span>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <button name="action" value="plus">+</button>&ndash;&gt;-->
+<!--&lt;!&ndash;                                &lt;!&ndash; В if true, если товар еще не был добавлен в корзину, false, если уже был &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                                <button name="action" value="plus" th:if="..." style="float:right;">В корзину</button>&ndash;&gt;-->
+<!--&lt;!&ndash;                            </form>&ndash;&gt;-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                </table>-->
+<!--            </td>-->
+<!--        </tr>-->
+</body>
+
+</html>

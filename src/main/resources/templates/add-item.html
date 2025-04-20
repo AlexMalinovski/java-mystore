@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:color="http://www.w3.org/1999/xhtml"
+      xmlns:display="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+    <title>Витрина товаров</title>
+    <style>
+        .validationError {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- В href ссылка на страницу заказов -->
+    <a th:href="@{/orders}" style="float:right;">
+        <b>ЗАКАЗЫ &cudarrr;</b>
+    </a>
+    <!-- В href ссылка на корзину -->
+    <a th:href="@{/cart}" style="float:right;">
+        <b>КОРЗИНА &cudarrr;</b>
+    </a>
+    <!-- В href ссылка на главную страницу -->
+    <a th:href="@{/main}" style="float:right;">
+        <b>ГЛАВНАЯ &cudarrr;</b>
+    </a>
+
+    <div style="width:70%;margin-left:auto;margin-right:auto;">
+        <form th:object="${newItemDto}" method="POST" enctype="multipart/form-data"  accept-charset="utf-8">
+
+                <label for="name">Название</label>
+                <input type="text" id="name" name="name" th:field="*{name}"/>
+                <p class="validationError" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+
+            <p>
+                <!-- В text описание товара -->
+                <label for="itemDescription">Описание</label>
+                <input type="text" id="itemDescription" name="description" th:field="*{description}"/>
+                <p class="validationError" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
+            </p>
+
+            <p>
+                <label for="itemPrice">Цена</label>
+                <input type="text" id="itemPrice" name="price" th:field="*{price}"/>
+                <p class="validationError" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></p>
+            </p>
+
+            <p>
+                <label for="image">Изображение</label>
+                <input type="file" th:field="*{img}" id="image" accept="image/jpeg"/>
+            </p>
+            <button type="submit" style="float:right;">Добавить</button>
+        </form>
+    </div>
+</body>
+
+</html>
