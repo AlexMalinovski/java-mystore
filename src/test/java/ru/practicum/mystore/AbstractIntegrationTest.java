@@ -1,13 +1,8 @@
 package ru.practicum.mystore;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MystoreApplicationTests {
-
-    @Test
-    void contextLoads() {
-    }
+public abstract class AbstractIntegrationTest {
 
 }

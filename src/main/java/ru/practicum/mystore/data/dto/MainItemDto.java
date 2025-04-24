@@ -1,9 +1,11 @@
 package ru.practicum.mystore.data.dto;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Builder(toBuilder = true)
+@EqualsAndHashCode
 @Getter
 public class MainItemDto {
     private final Long id;

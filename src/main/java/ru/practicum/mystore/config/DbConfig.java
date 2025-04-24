@@ -26,6 +26,10 @@ public class DbConfig {
     @Bean
     ApplicationRunner initDb() {
         return args -> {
+            orderItemRepository.deleteAll();
+            orderRepository.deleteAll();
+            itemRepository.deleteAll();
+
             Item item1 = Item.builder().name("item2").description("description2").price(300L).build();
             Item item2 = Item.builder().name("item1").description("description1").price(500L).build();
             Item item3 = Item.builder().name("item3").description("description3").price(100L).build();
