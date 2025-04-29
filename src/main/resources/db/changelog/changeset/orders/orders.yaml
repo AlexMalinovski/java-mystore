@@ -1,0 +1,11 @@
+databaseChangeLog:
+  #Table
+  - changeSet:
+      id: 000000000001-create-table-orders
+      author: Aleksey Malinovsky
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column: { name: id, type: bigint, autoIncrement: true, remarks: 'Id заказа', constraints: { primaryKey: true, nullable: false, primaryKeyName: pk_orders} }
+              - column: { name: status, type: varchar(15), remarks: 'Статус', constraints: { nullable: false } }

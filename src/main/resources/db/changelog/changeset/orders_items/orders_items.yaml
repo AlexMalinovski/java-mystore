@@ -1,0 +1,50 @@
+databaseChangeLog:
+  #Table
+  - changeSet:
+      id: 000000000001-create-orders_items
+      author: Aleksey Malinovsky
+      changes:
+        - createTable:
+            tableName: orders_items
+            columns:
+              - column: { name: order_id, type: bigint, remarks: 'Id заказа', constraints: { nullable: false } }
+              - column: { name: item_id, type: bigint, remarks: 'Артикул внутренний', constraints: { nullable: false } }
+              - column: { name: item_qty, type: integer, remarks: 'Количество товара', constraints: { nullable: false } }
+              - column: { name: item_price, type: bigint, remarks: 'Цена копеек', constraints: { nullable: false } }
+
+  - changeSet:
+      id: 000000000002-add-foreign-key-order_id
+      author: Aleksey Malinovsky
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: order_id
+            baseTableName: orders_items
+            constraintName: fk_orders_items_order_id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: orders
+            validate: true
+
+  - changeSet:
+      id: 000000000003-add-foreign-key-item_id
+      author: Aleksey Malinovsky
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: item_id
+            baseTableName: orders_items
+            constraintName: fk_orders_items_item_id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: items
+            validate: true
+
+  - changeSet:
+      id: 000000000004-add-composite-pk-orders_items
+      author: Aleksey Malinovsky
+      changes:
+        - addPrimaryKey:
+            columnNames: order_id,item_id
+            tableName: orders_items
+            constraintName: pk_orders_items

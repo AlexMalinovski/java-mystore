@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+    <title>Заказ</title>
+</head>
+
+<body>
+<!-- В href ссылка на страницу заказов -->
+<a th:href="@{/orders}" style="float:right;">
+    <b>ЗАКАЗЫ &cudarrr;</b>
+</a>
+<!-- В href ссылка на корзину -->
+<a th:href="@{/cart}" style="float:right;">
+    <b>КОРЗИНА &cudarrr;</b>
+</a>
+<!-- В href ссылка на главную страницу -->
+<a th:href="@{/main}" style="float:right;">
+    <b>ГЛАВНАЯ &cudarrr;</b>
+</a>
+<!-- В if true, если перешли со страницы оформления заказа, false в остальных случаях -->
+<h1 style="text-align:center" th:if="${cart.getStatus().name()} == PLACED and ${isneworder}">Поздравляем! Успешная покупка! &#128578;</h1>
+<table style="width:70%;margin-left:auto;margin-right:auto;">
+    <tr>
+        <td>
+            <!-- В text номер заказа -->
+            <h2 th:text=${cart.getId()}></h2>
+            <h3 th:text=${cart.getStatus()}></h3>
+        </td>
+    </tr>
+    <!-- Итерируемся по товарам из заказа -->
+    <tr th:each="item : ${cart.getItems()}">
+        <td>
+            <table>
+                <tr>
+                    <td>
+                        <!-- В href ссылка на страницу с карточкой товара -->
+                        <a th:href="...">
+                            <!-- В src ссылка изображение товара -->
+                            <img width="300" height="300" th:src="'data:image/jpeg;base64,' + ${item.getImg()}" alt="image">
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <!-- В text название товара -->
+                        <b th:text="${item.getName()}"></b>
+                    </td>
+                    <td>
+                        <!-- В text описание товара -->
+                        <b th:text="${item.getDescription()}"></b>
+                    </td>
+                    <td>
+                        <!-- В text цена товара -->
+                        <b th:text="${item.getPriceView()}"></b>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <!-- В text общая сумма заказа -->
+            <h3 th:text="${cart.getCost()}"></h3>
+        </td>
+    </tr>
+</table>
+</body>
+
+</html>

@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  mystore:
+    build: .
+    image: mystore
+    container_name: mystore
+    ports:
+      - "8090:8090"
