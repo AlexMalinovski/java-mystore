@@ -1,17 +1,16 @@
 package ru.practicum.mystore.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.practicum.mystore.data.dto.OrderDto;
 import ru.practicum.mystore.data.entity.Order;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface OrderService {
-    Order getOrCreateOrder(Long orderId);
+    Mono<Order> getOrCreateOrder(Long orderId);
 
-    Optional<Order> getOrderWithItemsById(long orderId);
+    Mono<Order> getOrderWithItemsById(long orderId);
 
-    void placeOrder(long orderId);
+    Mono<Long> placeOrder(long orderId);
 
-    List<OrderDto> getAllOrders();
+    Flux<OrderDto> getAllOrders();
 }

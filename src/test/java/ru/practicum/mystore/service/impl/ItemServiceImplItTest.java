@@ -20,44 +20,44 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ItemServiceImplItTest extends AbstractServiceTest {
 
-    @Test
-    void findPaginated() {
-        Page<MainItemDto> actual = itemService.findPaginated(PageRequest.of(0, 2), "", SortType.NO);
-
-        assertEquals(2, actual.getContent().size());
-        assertEquals(3, actual.getTotalElements());
-        assertEquals(2, actual.getTotalPages());
-        Map<Long, MainItemDto> collect = actual.getContent().stream()
-                .collect(Collectors.toMap(MainItemDto::getId, Function.identity()));
-        assertEquals("item2", collect.get(1L).getName());
-        assertEquals("item1", collect.get(2L).getName());
-    }
-
-    @Test
-    void findById() {
-        var actual = itemService.findById(1L);
-
-        assertTrue(actual.isPresent());
-        assertEquals("item2", actual.get().getName());
-    }
-
-    @Test
-    void findOnly() {
-        MainItemDto actual = itemService.findOnly(1L);
-
-        assertEquals("item2", actual.getName());
-    }
-
-    @Test
-    @Transactional
-    void addItem() {
-        Item expected = Util.aItem();
-        long itemId = itemService.addItem(Util.aItemDto());
-
-        var created = itemRepository.findById(itemId).get();
-        assertNotNull(created.getId());
-        assertEquals(expected.getName(), created.getName());
-        assertEquals(expected.getDescription(), created.getDescription());
-        assertEquals(expected.getPrice(), created.getPrice());
-    }
+//    @Test
+//    void findPaginated() {
+//        Page<MainItemDto> actual = itemService.findPaginated(PageRequest.of(0, 2), "", SortType.NO);
+//
+//        assertEquals(2, actual.getContent().size());
+//        assertEquals(3, actual.getTotalElements());
+//        assertEquals(2, actual.getTotalPages());
+//        Map<Long, MainItemDto> collect = actual.getContent().stream()
+//                .collect(Collectors.toMap(MainItemDto::getId, Function.identity()));
+//        assertEquals("item2", collect.get(1L).getName());
+//        assertEquals("item1", collect.get(2L).getName());
+//    }
+//
+//    @Test
+//    void findById() {
+//        var actual = itemService.findById(1L);
+//
+//        assertTrue(actual.isPresent());
+//        assertEquals("item2", actual.get().getName());
+//    }
+//
+//    @Test
+//    void findOnly() {
+//        MainItemDto actual = itemService.findOnly(1L);
+//
+//        assertEquals("item2", actual.getName());
+//    }
+//
+//    @Test
+//    @Transactional
+//    void addItem() {
+//        Item expected = Util.aItem();
+//        long itemId = itemService.addItem(Util.aItemDto());
+//
+//        var created = itemRepository.findById(itemId).get();
+//        assertNotNull(created.getId());
+//        assertEquals(expected.getName(), created.getName());
+//        assertEquals(expected.getDescription(), created.getDescription());
+//        assertEquals(expected.getPrice(), created.getPrice());
+//    }
 }

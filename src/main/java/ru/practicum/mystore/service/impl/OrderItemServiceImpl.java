@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.practicum.mystore.data.entity.Item;
 import ru.practicum.mystore.data.entity.Order;
 import ru.practicum.mystore.data.entity.OrderItem;
@@ -12,8 +14,8 @@ import ru.practicum.mystore.repositories.OrderItemRepository;
 import ru.practicum.mystore.service.OrderItemService;
 import ru.practicum.mystore.service.mapper.OrderItemMapper;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -23,7 +25,8 @@ public class OrderItemServiceImpl implements OrderItemService {
     private final OrderItemMapper orderItemMapper;
 
     private OrderItem incrementItemCnt(OrderItem orderItem) {
-        orderItem.setItemQty(orderItem.getItemQty() + 1);
+        Integer curCnt = Optional.ofNullable(orderItem.getItemQty()).orElse(0);
+        orderItem.setItemQty(curCnt + 1);
         return orderItem;
     }
 
@@ -33,9 +36,8 @@ public class OrderItemServiceImpl implements OrderItemService {
         return orderItem;
     }
 
-    private OrderItem createOrderItem(Order order, Item item) {
-        OrderItem orderItem = orderItemMapper.toOrderItem(order, item);
-        return orderItemRepository.save(orderItem);
+    private Mono<OrderItem> createOrderItem(Order order, Item item) {
+        return orderItemRepository.save(orderItemMapper.toOrderItem(order, item));
     }
 
     private OrderItem getDetachedOrderItem(OrderItem orderItem) {
@@ -55,35 +57,44 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     @Override
     @Transactional
-    public void addOrderItem(Order order, Item item) {
-        final var orderItemId = new OrderItemId(order.getId(), item.getId());
-        OrderItem existOrderItem = orderItemRepository.findById(orderItemId)
+    public Mono<Void> addOrderItem(Order order, Item item) {
+        return Mono.just(new OrderItemId(order.getId(), item.getId()))
+                .flatMap(params -> orderItemRepository.findByCompositeId(params.getOrderId(), params.getItemId()))
+                .switchIfEmpty(createOrderItem(order, item))
                 .map(this::incrementItemCnt)
-                .orElseGet(() -> createOrderItem(order, item));
-        updateOrderItemByItem(existOrderItem, item);
+                .doOnNext(orderItem -> updateOrderItemByItem(orderItem, item))
+                .flatMap(orderItemRepository::save)
+                .then();
     }
 
     @Override
     @Transactional
-    public void removeOrderItem(Order order, Item item) {
-        final var orderItemId = new OrderItemId(order.getId(), item.getId());
-        orderItemRepository.findById(orderItemId)
-                .map(this::decrementItemCnt)
-                .filter(orderItem -> orderItem.getItemQty() > 0)
-                .ifPresent(orderItem -> updateOrderItemByItem(orderItem, item));
+    public Mono<Void> removeOrderItem(Order order, Item item) {
+        return Mono.just(new OrderItemId(order.getId(), item.getId()))
+                .flatMap(params -> orderItemRepository.findByCompositeId(params.getOrderId(), params.getItemId()))
+                .doOnNext(this::decrementItemCnt)
+                .doOnNext(orderItem -> {
+                    if (orderItem.getItemQty() > 0) {
+                        updateOrderItemByItem(orderItem, item);
+                    }
+                })
+                .flatMap(orderItemRepository::save)
+                .then();
     }
 
     @Override
-    public List<OrderItem> findByOrderId(long orderId) {
+    public Flux<OrderItem> findByOrderId(long orderId) {
         return orderItemRepository.findAllByOrderId(orderId);
     }
 
     @Override
     @Transactional
-    public void removeOrderItemFull(Order order, Item item) {
-        final var orderItemId = new OrderItemId(order.getId(), item.getId());
-        orderItemRepository.findById(orderItemId)
-                .ifPresent(orderItem -> orderItem.setItemQty(0));
+    public Mono<Void> removeOrderItemFull(Order order, Item item) {
+        return Mono.just(new OrderItemId(order.getId(), item.getId()))
+                .flatMap(params -> orderItemRepository.findByCompositeId(params.getOrderId(), params.getItemId()))
+                .doOnNext(orderItem -> orderItem.setItemQty(0))
+                .flatMap(orderItemRepository::save)
+                .then();
     }
 
 }

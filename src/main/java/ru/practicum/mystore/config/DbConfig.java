@@ -26,31 +26,31 @@ public class DbConfig {
     @Bean
     ApplicationRunner initDb() {
         return args -> {
-            orderItemRepository.deleteAll();
-            orderRepository.deleteAll();
-            itemRepository.deleteAll();
+            orderItemRepository.deleteAll().block();
+            orderRepository.deleteAll().block();
+            itemRepository.deleteAll().block();
 
             Item item1 = Item.builder().name("item2").description("description2").price(300L).build();
             Item item2 = Item.builder().name("item1").description("description1").price(500L).build();
             Item item3 = Item.builder().name("item3").description("description3").price(100L).build();
-            itemRepository.saveAll(List.of(item1, item2, item3));
+            itemRepository.saveAll(List.of(item1, item2, item3)).blockLast();
 
             Order order1 = Order.builder().status(OrderStatus.NEW).build();
-            orderRepository.saveAll(List.of(order1));
+            orderRepository.saveAll(List.of(order1)).blockLast();
 
             OrderItem orderItem1 = OrderItem.builder()
                     .orderId(order1.getId())
-                    .item(item1)
+                    .itemId(item1.getId())
                     .itemQty(3)
                     .itemPrice(item1.getPrice())
                     .build();
             OrderItem orderItem2 = OrderItem.builder()
                     .orderId(order1.getId())
-                    .item(item2)
+                    .itemId(item2.getId())
                     .itemQty(1)
                     .itemPrice(item2.getPrice())
                     .build();
-            orderItemRepository.saveAll(List.of(orderItem1, orderItem2));
+            orderItemRepository.saveAll(List.of(orderItem1, orderItem2)).blockLast();
 
             log.info("БД инициализирована демо-значениями");
         };

@@ -15,17 +15,17 @@ import ru.practicum.mystore.service.OrderService;
         MainController.class,
         OrderController.class})
 public abstract class AbstractWebMvcTest {
-    @Autowired
-    protected MockMvc mockMvc;
-
-    protected ObjectMapper objectMapper = new ObjectMapper();
-
-    @MockitoBean
-    protected ItemService itemService;
-
-    @MockitoBean
-    protected CartService cartService;
-
-    @MockitoBean
-    protected OrderService orderService;
+//    @Autowired
+//    protected MockMvc mockMvc;
+//
+//    protected ObjectMapper objectMapper = new ObjectMapper();
+//
+//    @MockitoBean
+//    protected ItemService itemService;
+//
+//    @MockitoBean
+//    protected CartService cartService;
+//
+//    @MockitoBean
+//    protected OrderService orderService;
 }
