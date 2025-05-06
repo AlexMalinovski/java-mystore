@@ -91,6 +91,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Mono<Long> addItem(NewItemDto itemDto) {
         Mono<byte[]> image = mapFilePartToBytes(itemDto.getImg());
+        if (image == null) {
+            image = Mono.empty();
+        }
         return Mono.just(itemMapper.toItem(itemDto))
                 .zipWith(image)
                 .map(t -> t.getT1().toBuilder().img(t.getT2()).build())

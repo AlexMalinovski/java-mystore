@@ -3,50 +3,54 @@ package ru.practicum.mystore.controller;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Mono;
 import ru.practicum.mystore.data.dto.MainItemDto;
 import ru.practicum.mystore.data.dto.NewItemDto;
 
-import java.math.BigDecimal;
-
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class ItemControllerItTest extends AbstractWebMvcTest {
+class ItemControllerItTest extends AbstractControllerTest {
 
-//    @Test
-//    @SneakyThrows
-//    void getItem() {
-//        when(itemService.findOnly(1L)).thenReturn(MainItemDto.builder().build());
-//        mockMvc.perform(get(StoreUrls.Items.ItemId.FULL.replaceAll("\\{itemId}", "1")))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("text/html;charset=UTF-8"))
-//                .andExpect(model().attributeExists("item"));
-//    }
-//
-//    @Test
-//    @SneakyThrows
-//    void getItemEditor() {
-//        mockMvc.perform(get(StoreUrls.Items.Add.FULL))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("text/html;charset=UTF-8"))
-//                .andExpect(model().attributeExists("newItemDto"));
-//    }
-//
-//    @Test
-//    @SneakyThrows
-//    void addItem() {
-//        NewItemDto dto = NewItemDto.builder().name("name").description("descr").price(new BigDecimal(100)).build();
-//        when(itemService.addItem(dto)).thenReturn(1L);
-//        mockMvc.perform(post(StoreUrls.Items.Add.FULL)
-//                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-//                        .flashAttr("newItemDto", dto))
-//                .andExpect(status().is3xxRedirection())
-//                .andExpect(redirectedUrl(
-//                        StoreUrls.Items.ItemId.FULL.replaceAll("\\{itemId}", String.valueOf(1L))));
-//    }
+    @Test
+    @SneakyThrows
+    void getItem() {
+        when(itemService.findOnly(1L)).thenReturn(Mono.just(MainItemDto.builder().build()));
+        webTestClient.get()
+                .uri(StoreUrls.Items.ItemId.FULL.replaceAll("\\{itemId}", "1"))
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    //
+    @Test
+    @SneakyThrows
+    void getItemEditor() {
+        webTestClient.get()
+                .uri(StoreUrls.Items.Add.FULL)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    @SneakyThrows
+    void addItem() {
+        NewItemDto dto = NewItemDto.builder().build();
+
+        MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
+        multipartBodyBuilder.part("newItemDto", objectMapper.writeValueAsBytes(dto))
+                .contentType(MediaType.MULTIPART_FORM_DATA);
+
+
+        when(itemService.addItem(any())).thenReturn(Mono.just(1L));
+        webTestClient.post()
+                .uri(StoreUrls.Items.Add.FULL)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+
+                .body(BodyInserters.fromMultipartData(multipartBodyBuilder.build()))
+                .exchange()
+                .expectStatus().isOk();
+    }
 }
