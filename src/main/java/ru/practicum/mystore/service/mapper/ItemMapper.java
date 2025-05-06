@@ -73,9 +73,10 @@ public interface ItemMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
     @Mapping(target = "cartCnt", source = "itemQty")
+    @Mapping(target = "id", ignore = true)
     MainItemDto updateMainItemDto(@MappingTarget MainItemDto.MainItemDtoBuilder builder, OrderItem updates);
 
-    @Mapping(target = "img", source = "img", qualifiedByName = "mapMultipartToBytes")
+    @Mapping(target = "img", ignore = true)
     @Mapping(target = "price", source = "price", qualifiedByName = "mapPriceInternal")
     Item toItem(NewItemDto src);
 }

@@ -2,7 +2,7 @@
 Приложение интернет-магазин
 
 ## Технологии и инструменты:
-Java 21, Spring Boot v3.3.10 (Web, Validation), JPA, H2, Maven, Lombok, MapStruct, JUnit, Mockito, Tomcat.
+Java 21, Spring Boot v3.3.10 (WebFlux, Validation), R2DBC, H2, Maven, Lombok, MapStruct, JUnit, Mockito, Netty.
 
 ## Инструкция по развёртыванию и системные требования
 Min CPU/Core: 1/1, RAM:1Gb.

@@ -1,50 +1,42 @@
 package ru.practicum.mystore.data.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.mystore.data.entity.id.OrderItemId;
+import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.Objects;
 
-@Entity
 @Table(name = "orders_items")
-@IdClass(OrderItemId.class)
 @Builder(toBuilder = true)
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderItem {
-
     @Id
-    @Column(name = "order_id", nullable = false)
+    private Long id;
+
+    @Column("order_id")
     private Long orderId;
 
-    @Id
-    @Column(name = "item_id", nullable = false)
+    @Column("item_id")
     private Long itemId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("itemId")
-    @JoinColumn(name = "item_id")
+    @Transient
     private Item item;
 
-    @Column(name = "item_qty", nullable = false)
+    @Column("item_qty")
     private Integer itemQty;
 
-    @Column(name = "item_price", nullable = false)
+    @Column("item_price")
     private Long itemPrice;
 
     @Override

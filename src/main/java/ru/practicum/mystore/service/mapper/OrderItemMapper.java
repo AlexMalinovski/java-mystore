@@ -27,9 +27,11 @@ public interface OrderItemMapper {
     }
 
     @Mapping(target = "orderId", source = "order.id")
+    @Mapping(target = "itemId", source = "item.id")
     @Mapping(target = "item", source = "item")
-    @Mapping(target = "itemQty", constant = "1")
+    @Mapping(target = "itemQty", constant = "0")
     @Mapping(target = "itemPrice", source = "item.price")
+    @Mapping(target = "id", ignore = true)
     OrderItem toOrderItem(Order order, Item item);
 
     @Mapping(target = "items", source = "orderItems")

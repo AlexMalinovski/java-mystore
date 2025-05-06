@@ -1,17 +1,17 @@
 package ru.practicum.mystore.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.practicum.mystore.data.entity.Item;
 import ru.practicum.mystore.data.entity.Order;
 import ru.practicum.mystore.data.entity.OrderItem;
 
-import java.util.List;
-
 public interface OrderItemService {
-    void addOrderItem(Order order, Item item);
+    Mono<Void> addOrderItem(Order order, Item item);
 
-    void removeOrderItem(Order order, Item item);
+    Mono<Void> removeOrderItem(Order order, Item item);
 
-    List<OrderItem> findByOrderId(long orderId);
+    Flux<OrderItem> findByOrderId(long orderId);
 
-    void removeOrderItemFull(Order order, Item item);
+    Mono<Void> removeOrderItemFull(Order order, Item item);
 }

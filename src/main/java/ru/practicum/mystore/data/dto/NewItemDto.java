@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.codec.multipart.FilePart;
 
 import java.math.BigDecimal;
 
@@ -26,5 +26,5 @@ public class NewItemDto {
     @Digits(integer = 10, fraction = 2)
     private BigDecimal price;
 
-    private final MultipartFile img;
+    private FilePart img;
 }

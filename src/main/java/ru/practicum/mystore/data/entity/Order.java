@@ -1,64 +1,38 @@
 package ru.practicum.mystore.data.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
-import jakarta.persistence.NamedSubgraph;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import ru.practicum.mystore.data.constant.OrderStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Entity
 @Table(name = "orders")
 @Builder(toBuilder = true)
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@NamedEntityGraph(
-        name = "order-fetch-items",
-        attributeNodes = {
-                @NamedAttributeNode(value = "orderItems", subgraph = "items-subgraph")
-        },
-        subgraphs = {
-                @NamedSubgraph(name = "items-subgraph", attributeNodes = {
-                        @NamedAttributeNode("item")
-                })
-        }
-)
-
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Column("status")
     private OrderStatus status;
 
+    @Transient
     @Builder.Default
-    @OneToMany(mappedBy = "orderId",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Override
