@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import ru.practicum.mystore.data.dto.MainItemDto;
+import reactor.core.publisher.Mono;
 import ru.practicum.mystore.data.dto.NewItemDto;
 import ru.practicum.mystore.service.CartService;
 import ru.practicum.mystore.service.ItemService;
@@ -24,29 +24,35 @@ public class ItemController {
     private final CartService cartService;
 
     @GetMapping(StoreUrls.Items.ItemId.FULL)
-    public String getItem(@PathVariable long itemId, Model model) {
-        MainItemDto mainItemDto = itemService.findOnly(itemId);
-        final Long orderId = (Long) model.asMap().get("orderId");
-        if (orderId != null) {
-            mainItemDto = cartService.updateMainItemDtoByCart(mainItemDto, orderId);
-        }
-        model.addAttribute("item", mainItemDto);
-        return "item";
+    public Mono<String> getItem(@PathVariable long itemId, Model model) {
+
+        return itemService.findOnly(itemId)
+                .flatMap(mainItemDto -> {
+                    final Long orderId = (Long) model.asMap().get("orderId");
+                    if (orderId != null) {
+                        return cartService.updateMainItemDtoByCart(mainItemDto, orderId);
+                    }
+                    return Mono.just(mainItemDto);
+                })
+                .doOnNext(mainItemDto -> model.addAttribute("item", mainItemDto))
+                .map(mainItemDto -> "item");
     }
 
     @GetMapping(StoreUrls.Items.Add.FULL)
-    public String getItemEditor(Model model) {
+    public Mono<String> getItemEditor(Model model) {
         model.addAttribute("newItemDto", NewItemDto.builder().build());
-        return "add-item";
+        return Mono.just("add-item");
     }
 
     @PostMapping(value = StoreUrls.Items.Add.FULL, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public String addItem(@ModelAttribute("newItemDto") @Valid NewItemDto newItemDto, BindingResult result, Model model) {
+    public Mono<String> addItem(@ModelAttribute("newItemDto") @Valid NewItemDto newItemDto, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("newItemDto", newItemDto);
-            return "add-item";
+            return Mono.just("add-item");
         }
-        Long itemId = itemService.addItem(newItemDto);
-        return "redirect:" + StoreUrls.Items.ItemId.FULL.replaceAll("\\{itemId}", String.valueOf(itemId));
+
+        return itemService.addItem(newItemDto)
+                .map(itemId -> "redirect:" +
+                        StoreUrls.Items.ItemId.FULL.replaceAll("\\{itemId}", String.valueOf(itemId)));
     }
 }

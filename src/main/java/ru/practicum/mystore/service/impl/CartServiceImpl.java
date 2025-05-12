@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 import ru.practicum.mystore.data.dto.CartAction;
 import ru.practicum.mystore.data.dto.CartDto;
 import ru.practicum.mystore.data.dto.MainItemDto;
@@ -22,8 +23,8 @@ import ru.practicum.mystore.service.mapper.OrderItemMapper;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -34,53 +35,62 @@ public class CartServiceImpl implements CartService {
     private final ItemMapper itemMapper;
     private final OrderItemMapper orderItemMapper;
 
+    private BiFunction<Order, Item, Mono<Void>> changeCartAction(CartAction cartAction) {
+        return switch (cartAction.getAction().toLowerCase(Locale.ROOT)) {
+            case "plus" -> orderItemService::addOrderItem;
+            case "minus" -> orderItemService::removeOrderItem;
+            case "delete" -> orderItemService::removeOrderItemFull;
+            default -> throw new IllegalArgumentException("Неподдерживаемое событие корзины");
+        };
+    }
+
     @Override
     @Transactional
-    public Long handleCartAction(CartAction cartAction, long itemId, Long orderId) {
-        Order order = orderService.getOrCreateOrder(orderId);
-        Item item = itemService.findById(itemId)
-                .orElseThrow(
-                        () -> new BadRequestException(String.format("Товар id=%d не найден в БД", itemId)));
-        switch (cartAction.getAction().toLowerCase(Locale.ROOT)) {
-            case "plus" -> orderItemService.addOrderItem(order, item);
-            case "minus" -> orderItemService.removeOrderItem(order, item);
-            case "delete" -> orderItemService.removeOrderItemFull(order, item);
-            default -> throw new IllegalArgumentException("Неподдерживаемое событие корзины");
-        }
-        return order.getId();
+    public Mono<Long> handleCartAction(CartAction cartAction, long itemId, Long orderId) {
+        Mono<Order> order = orderService.getOrCreateOrder(orderId);
+        Mono<Item> item = itemService.findById(itemId)
+                .switchIfEmpty(
+                        Mono.error(new BadRequestException(String.format("Товар id=%d не найден в БД", itemId))));
+
+        return order.zipWith(item)
+                .doOnSuccess(t -> changeCartAction(cartAction).apply(t.getT1(), t.getT2()).subscribe())
+                .map(t -> t.getT1().getId());
     }
 
-    private Map<Long, OrderItem> getOrderItems(long orderId) {
+    private Mono<Map<Long, OrderItem>> getOrderItems(long orderId) {
         return orderItemService.findByOrderId(orderId)
-                .stream()
                 .filter(orderItem -> orderItem.getItemQty() > 0)
-                .collect(Collectors.toMap(OrderItem::getItemId, Function.identity()));
+                .collectMap(OrderItem::getItemId, Function.identity());
     }
 
     @Override
-    public Page<MainItemDto> updatePageDataByCart(Page<MainItemDto> pageData, Long orderId) {
-        final Map<Long, OrderItem> cartByItemId = getOrderItems(orderId);
-        return pageData.map(
-                mainItemDto -> itemMapper.updateMainItemDto(
-                        mainItemDto.toBuilder(), cartByItemId.get(mainItemDto.getId())));
+    public Mono<Page<MainItemDto>> updatePageDataByCart(Page<MainItemDto> pageData, Long orderId) {
+        return getOrderItems(orderId)
+                .map(cart -> pageData.map(mainItemDto -> itemMapper.updateMainItemDto(
+                        mainItemDto.toBuilder(), cart.get(mainItemDto.getId()))));
     }
 
     @Override
-    public MainItemDto updateMainItemDtoByCart(MainItemDto mainItemDto, Long orderId) {
-        final Map<Long, OrderItem> cartByItemId = getOrderItems(orderId);
-        return itemMapper.updateMainItemDto(
-                mainItemDto.toBuilder(), cartByItemId.get(mainItemDto.getId()));
+    public Mono<MainItemDto> updateMainItemDtoByCart(MainItemDto mainItemDto, Long orderId) {
+        return getOrderItems(orderId)
+                .map(items -> itemMapper.updateMainItemDto(
+                        mainItemDto.toBuilder(), items.get(mainItemDto.getId())));
     }
 
     @Override
-    public CartDto getOrderCart(Long orderId) {
-        Order order = orderService.getOrderWithItemsById(orderId)
-                .orElseThrow(() -> new NotFoundException("Корзина не найдена"));
+    public Mono<CartDto> getOrderCart(Long orderId) {
+        if (orderId == null) {
+            throw new NotFoundException("Корзина не найдена. Добавьте товары.");
+        }
+        return orderService.getOrderWithItemsById(orderId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Корзина не найдена")))
+                .map(order -> order.toBuilder()
+                        .orderItems(filterQuantityPositive(order.getOrderItems()))
+                        .build())
+                .map(orderItemMapper::toCartDto);
+    }
 
-        List<OrderItem> items = order.getOrderItems().stream()
-                .filter(item -> item.getItemQty() > 0)
-                .toList();
-        return orderItemMapper.toCartDto(
-                order.toBuilder().orderItems(items).build());
+    private List<OrderItem> filterQuantityPositive(List<OrderItem> orderItems) {
+        return orderItems.stream().filter(orderItem -> orderItem.getItemQty() > 0).toList();
     }
 }

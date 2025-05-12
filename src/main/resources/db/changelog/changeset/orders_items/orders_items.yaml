@@ -7,6 +7,7 @@ databaseChangeLog:
         - createTable:
             tableName: orders_items
             columns:
+              - column: { name: id, type: bigint, autoIncrement: true, remarks: 'Id записи', constraints: { primaryKey: true, nullable: false, primaryKeyName: pk_orders_items} }
               - column: { name: order_id, type: bigint, remarks: 'Id заказа', constraints: { nullable: false } }
               - column: { name: item_id, type: bigint, remarks: 'Артикул внутренний', constraints: { nullable: false } }
               - column: { name: item_qty, type: integer, remarks: 'Количество товара', constraints: { nullable: false } }
@@ -41,10 +42,17 @@ databaseChangeLog:
             validate: true
 
   - changeSet:
-      id: 000000000004-add-composite-pk-orders_items
+      id: 000000000004-add-index-orders_items_order_id_item_id
       author: Aleksey Malinovsky
       changes:
-        - addPrimaryKey:
-            columnNames: order_id,item_id
+        - createIndex:
+            indexName: idx_orders_items_order_id_item_id
             tableName: orders_items
-            constraintName: pk_orders_items
+            unique: true
+            columns:
+              - column:
+                  name: order_id
+                  type: bigint
+              - column:
+                  name: item_id
+                  type: bigint
