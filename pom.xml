@@ -23,6 +23,7 @@
 	</developers>
     <modules>
         <module>mystore-basic</module>
+        <module>mystore-payment</module>
     </modules>
     <scm>
 		<connection/>
