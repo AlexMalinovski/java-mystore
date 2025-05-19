@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: Сервис платежей
+  version: 1.0.0
+
+paths:
+  /balance:
+    get:
+      tags:
+        - BalanceController
+      summary: Получить значение баланса
+      operationId: getBalance
+      responses:
+        '200':
+          description: Баланс получен
+          content:
+            application/json:
+              schema:
+                type:
+                $ref: '#/components/schemas/BalanceDto'
+  /payment:
+    post:
+      tags:
+        - PaymentController
+      summary: Новая оплата
+      operationId: createPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Результат операции
+          content:
+            application/json:
+              schema:
+                type:
+                $ref: '#/components/schemas/PaymentDto'
+components:
+  schemas:
+    BalanceDto:
+      type: object
+      properties:
+        value:
+          type: bigdecimal
+
+    PaymentRequest:
+      type: object
+      properties:
+        value:
+          type: number
+          minimum: 0.01
+          maximum: 99999999.99
+          multipleOf: 0.01
+      required:
+        - value
+
+    PaymentDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["ERROR", "SUCCESS"]
+        message:
+          type: string
+
