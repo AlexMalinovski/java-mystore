@@ -18,6 +18,10 @@ import ru.practicum.mystore.basic.repositories.OrderItemRepository;
 import ru.practicum.mystore.basic.repositories.OrderRepository;
 import ru.practicum.mystore.basic.service.OrderService;
 import ru.practicum.mystore.basic.service.mapper.OrderMapper;
+import ru.practicum.mystore.basic.tools.Util;
+import ru.practicum.mystore.common.payment.client.PaymentControllerApi;
+import ru.practicum.mystore.common.payment.data.dto.PaymentDto;
+import ru.practicum.mystore.common.payment.data.dto.PaymentRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
     private final OrderMapper orderMapper;
+    private final PaymentControllerApi paymentControllerApiClient;
 
     private Mono<Order> findOrderByIdFetchItems(Long id) {
         Mono<Map<Long, Item>> items = itemRepository.findAllById(
@@ -80,14 +85,27 @@ public class OrderServiceImpl implements OrderService {
                         new NotFoundException(String.format(
                                 "Отсутствует новый заказ id=%s", orderId))))
                 .doOnNext(order -> order.setStatus(OrderStatus.PLACED))
-                .flatMap(orderRepository::save)
-                .doOnNext(order -> log.info("Заказ номер {} размещён.", order.getId()))
-                .map(Order::getId);
+                .flatMap(this::proceedPayment);
     }
 
     @Override
     public Flux<OrderDto> getAllOrders() {
         return orderRepository.findAllFetchItems()
                 .map(orderMapper::toOrderDto);
+    }
+
+    private Mono<Long> proceedPayment(Order order) {
+        PaymentRequest paymentRequest = orderMapper.toPaymentRequest(order);
+        return paymentControllerApiClient.createPayment(paymentRequest)
+                .onErrorResume(e -> Util.getFailPaymentDto(e.getMessage()))
+                .flatMap(paymentDto -> {
+                    if (paymentDto.getStatus() != PaymentDto.StatusEnum.SUCCESS) {
+                        log.info("Оплата заказа id={} не удалась: {}", order.getId(), paymentDto.getMessage());
+                        return Mono.empty();
+                    }
+                    return orderRepository.save(order)
+                            .doOnNext(saved -> log.info("Заказ номер {} размещён.", saved.getId()))
+                            .map(Order::getId);
+                });
     }
 }

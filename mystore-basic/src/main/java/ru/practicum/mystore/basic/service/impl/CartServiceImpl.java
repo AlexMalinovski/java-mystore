@@ -19,10 +19,14 @@ import ru.practicum.mystore.basic.service.OrderItemService;
 import ru.practicum.mystore.basic.service.OrderService;
 import ru.practicum.mystore.basic.service.mapper.ItemMapper;
 import ru.practicum.mystore.basic.service.mapper.OrderItemMapper;
+import ru.practicum.mystore.common.payment.client.BalanceControllerApi;
+import ru.practicum.mystore.common.payment.data.dto.BalanceDto;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -34,6 +38,7 @@ public class CartServiceImpl implements CartService {
     private final ItemService itemService;
     private final ItemMapper itemMapper;
     private final OrderItemMapper orderItemMapper;
+    private final BalanceControllerApi balanceControllerApiClient;
 
     private BiFunction<Order, Item, Mono<Void>> changeCartAction(CartAction cartAction) {
         return switch (cartAction.getAction().toLowerCase(Locale.ROOT)) {
@@ -87,7 +92,31 @@ public class CartServiceImpl implements CartService {
                 .map(order -> order.toBuilder()
                         .orderItems(filterQuantityPositive(order.getOrderItems()))
                         .build())
-                .map(orderItemMapper::toCartDto);
+                .map(orderItemMapper::toCartDto)
+
+
+
+                .zipWith(balanceControllerApiClient.getBalance().onErrorReturn(new BalanceDto()))
+                .map(t -> setPaymentAvailable(t.getT1(), t.getT2()));
+    }
+
+    private CartDto setPaymentAvailable(CartDto cartDto, BalanceDto balanceDto) {
+        Optional<BigDecimal> valOptional = Optional.ofNullable(balanceDto)
+                .map(BalanceDto::getValue);
+        boolean isPayment = valOptional
+                .map(val -> val.compareTo(new BigDecimal(cartDto.getCost())) >= 0)
+                .orElse(false);
+
+        final String message;
+        if (valOptional.isPresent()) {
+            message = !isPayment ? "Недостаточно средств" : "";
+        } else {
+            message = "Сервис платежей недоступен.";
+        }
+        return cartDto.toBuilder()
+                .isAvailablePayment(isPayment)
+                .systemMessage(message)
+                .build();
     }
 
     private List<OrderItem> filterQuantityPositive(List<OrderItem> orderItems) {

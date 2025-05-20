@@ -1,6 +1,8 @@
 package ru.practicum.mystore.basic.tools;
 
 import lombok.experimental.UtilityClass;
+import reactor.core.publisher.Mono;
+import ru.practicum.mystore.common.payment.data.dto.PaymentDto;
 
 import java.math.BigDecimal;
 
@@ -20,5 +22,12 @@ public class Util {
         long digits = price.subtract(new BigDecimal(ceil)).multiply(new BigDecimal(100)).longValue();
 
         return 100 * ceil + digits;
+    }
+
+    public static Mono<PaymentDto> getFailPaymentDto(String message) {
+        var result = new PaymentDto();
+        result.setMessage(message);
+        result.setStatus(PaymentDto.StatusEnum.ERROR);
+        return Mono.just(result);
     }
 }

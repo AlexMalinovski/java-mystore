@@ -7,7 +7,9 @@ import ru.practicum.mystore.basic.data.dto.OrderDto;
 import ru.practicum.mystore.basic.data.entity.Order;
 import ru.practicum.mystore.basic.data.entity.OrderItem;
 import ru.practicum.mystore.basic.tools.Util;
+import ru.practicum.mystore.common.payment.data.dto.PaymentRequest;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Mapper(config = DefaultMapperConfig.class)
@@ -37,7 +39,19 @@ public interface OrderMapper {
         return Util.toPrice(total);
     }
 
+    @Named("toPaymentRequestValue")
+    default BigDecimal toPaymentRequestValue(List<OrderItem> src) {
+        if (src == null) {
+            return null;
+        }
+        return new BigDecimal(toOrderCost(src));
+    }
+
     @Mapping(target = "itemsSummary", source = "src.orderItems", qualifiedByName = "toItemSummaryList")
     @Mapping(target = "costView", source = "src.orderItems", qualifiedByName = "toOrderCost")
     OrderDto toOrderDto(Order src);
+
+    @Mapping(target = "value", source = "src.orderItems", qualifiedByName = "toPaymentRequestValue")
+    PaymentRequest toPaymentRequest(Order src);
+
 }

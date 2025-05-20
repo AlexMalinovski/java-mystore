@@ -13,4 +13,6 @@ public class CartDto {
     private String cost;
     private OrderStatus status;
     private Long id;
+    private Boolean isAvailablePayment;
+    private String systemMessage;
 }

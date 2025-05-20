@@ -70,7 +70,8 @@
             	В if true, если в корзине есть товары, false, если нет
             -->
             <form th:action="@{/orders}" method="post" th:if="${!cart.getItems().isEmpty()}">
-                <button>Купить</button>
+                <button th:if="${cart.getIsAvailablePayment()}">Купить</button>
+                <p th:text="${cart.getSystemMessage()}"></p>
             </form>
         </td>
     </tr>

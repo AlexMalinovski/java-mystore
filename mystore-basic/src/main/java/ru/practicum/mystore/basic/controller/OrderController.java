@@ -33,7 +33,8 @@ public class OrderController {
                     status.setComplete();
                 })
                 .map(order -> "redirect:" + StoreUrls.Orders.OrderId.FULL.replaceAll(
-                        "\\{orderId}", String.valueOf(order)) + "?isNew=true");
+                        "\\{orderId}", String.valueOf(order)) + "?isNew=true")
+                .switchIfEmpty(Mono.just("redirect:" + StoreUrls.Cart.FULL));
     }
 
     @GetMapping(StoreUrls.Orders.OrderId.FULL)
