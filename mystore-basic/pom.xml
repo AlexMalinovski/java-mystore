@@ -140,6 +140,35 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.12.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${maven.multiModuleProjectDirectory}/openapi/paymentservice-spec.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <apiPackage>ru.practicum.mystore.common.payment.client</apiPackage>
+                            <invokerPackage>ru.practicum.mystore.common.payment.service</invokerPackage>
+                            <modelPackage>ru.practicum.mystore.common.payment.data.dto</modelPackage>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <typeMappings>
+                                <typeMapping>bigdecimal=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
+                            <configOptions>
+                                <library>webclient</library>
+                                <useJakartaEe>true</useJakartaEe>
+                                <openApiNullable>false</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
