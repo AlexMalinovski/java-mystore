@@ -103,7 +103,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/api-spec.yaml</inputSpec>
+                            <inputSpec>${maven.multiModuleProjectDirectory}/openapi/paymentservice-spec.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>ru.practicum.mystore.payment.controller</apiPackage>
                             <invokerPackage>ru.practicum.mystore.payment.service</invokerPackage>
