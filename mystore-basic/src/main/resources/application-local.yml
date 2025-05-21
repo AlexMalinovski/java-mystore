@@ -1,0 +1,8 @@
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+  cache:
+    redis:
+      time-to-live: PT5S    # TTL по умолчанию для кешей

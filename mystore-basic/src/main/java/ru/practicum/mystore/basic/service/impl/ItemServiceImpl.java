@@ -1,6 +1,7 @@
 package ru.practicum.mystore.basic.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import ru.practicum.mystore.basic.config.CacheConfig;
 import ru.practicum.mystore.basic.data.constant.SortType;
 import ru.practicum.mystore.basic.data.dto.MainItemDto;
 import ru.practicum.mystore.basic.data.dto.NewItemDto;
@@ -89,6 +91,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @CacheEvict(cacheNames = {
+            CacheConfig.ITEMS_ORDER_PRICE, CacheConfig.ITEMS_ORDER_NAME, CacheConfig.ITEMS_ORDER_NONE},
+            allEntries = true)
     public Mono<Long> addItem(NewItemDto itemDto) {
         Mono<byte[]> image = mapFilePartToBytes(itemDto.getImg());
         if (image == null) {
