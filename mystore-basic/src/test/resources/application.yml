@@ -1,6 +1,3 @@
-server:
-  port: 8090
-
 spring:
   r2dbc:
     url: r2dbc:h2:mem:///~/db/testdb
@@ -11,15 +8,14 @@ spring:
     user: test
     password: test
     enabled: true
-
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-    cache:
-      redis:
-        time-to-live: PT5S    # TTL по умолчанию для кешей
+      host: 127.0.0.1
+      port: 6379
+  cache:
+    redis:
+      time-to-live: PT5S    # TTL по умолчанию для кешей
 
 app-pref:
   payment-service:
-    url: "http://${PAYMENT_SERVICE_URL}:${PAYMENT_SERVICE_PORT}"
+    url: "http://127.0.0.1:8091"

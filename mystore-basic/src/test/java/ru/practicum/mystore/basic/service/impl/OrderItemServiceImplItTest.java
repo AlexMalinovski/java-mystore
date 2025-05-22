@@ -20,10 +20,10 @@ class OrderItemServiceImplItTest extends AbstractServiceTest {
         Item item = itemRepository.findById(3L).block();
         Order order = Order.builder().id(1L).build();
 
-        orderItemService.addOrderItem(order, item).subscribe();
-
-        orderRepository.findOrderById(1L).subscribe(actual -> {
-            assertEquals(3, actual.getOrderItems().size());
+        orderItemService.addOrderItem(order, item).subscribe(val -> {
+            orderRepository.findOrderById(1L).subscribe(actual -> {
+                assertEquals(3, actual.getOrderItems().size());
+            });
         });
     }
 
@@ -32,12 +32,11 @@ class OrderItemServiceImplItTest extends AbstractServiceTest {
         Order order = orderRepository.findOrderById(1L).block();
         Item item = itemRepository.findById(1L).block();
 
-        orderItemService.removeOrderItem(order, item).subscribe();
-
-        orderItemRepository.findByCompositeId(1L, 1L).subscribe(actual -> {
-            assertEquals(2, actual.getItemQty());
+        orderItemService.removeOrderItem(order, item).subscribe(val -> {
+            orderItemRepository.findByCompositeId(1L, 1L).subscribe(actual -> {
+                assertEquals(2, actual.getItemQty());
+            });
         });
-
     }
 
     @Test
@@ -56,10 +55,12 @@ class OrderItemServiceImplItTest extends AbstractServiceTest {
         Order order = orderRepository.findOrderById(1L).block();
         Item item = itemRepository.findById(1L).block();
 
-        orderItemService.removeOrderItemFull(order, item).subscribe();
-
-        orderItemRepository.findByCompositeId(1L, 1L).subscribe(actual -> {
-            assertEquals(0, actual.getItemQty());
+        orderItemService.removeOrderItemFull(order, item).subscribe(val -> {
+            orderItemRepository.findByCompositeId(1L, 1L).subscribe(actual -> {
+                assertEquals(0, actual.getItemQty());
+            });
         });
+
+
     }
 }
