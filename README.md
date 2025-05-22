@@ -2,7 +2,7 @@
 Приложение интернет-магазин
 
 ## Технологии и инструменты:
-Java 21, Spring Boot v3.3.10 (WebFlux, Validation), R2DBC, H2, Maven, Lombok, MapStruct, JUnit, Mockito, Netty.
+Java 21, Spring Boot v3.3.10 (WebFlux, Validation), R2DBC, H2, Maven, Lombok, MapStruct, JUnit, Mockito, Netty, Redis.
 
 ## Инструкция по развёртыванию и системные требования
 Min CPU/Core: 1/1, RAM:1Gb.
@@ -13,5 +13,7 @@ Min CPU/Core: 1/1, RAM:1Gb.
 4. Открыть браузер и перейти: http://localhost:8090/main;
 
 По-умолчанию БД приложения будет содержать демонстрационные данные.
+
+Сервис платежей работает в демо-режиме: значение баланса всегда = 100
 
 Для добавления в справочник нового товара перейдите на http://localhost:8090/items/add
