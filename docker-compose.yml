@@ -1,8 +1,29 @@
 version: '3.8'
 services:
-  mystore:
-    build: .
-    image: mystore
-    container_name: mystore
+  mystore-basic:
+    build: ./mystore-basic
+    image: mystore-basic
+    container_name: mystore-basic
     ports:
       - "8090:8090"
+    depends_on:
+      - mystore-payment
+      - redis-db
+    environment:
+      - REDIS_HOST=redis-db
+      - REDIS_PORT=6379
+      - PAYMENT_SERVICE_URL=mystore-payment
+      - PAYMENT_SERVICE_PORT=8091
+
+  mystore-payment:
+    build: ./mystore-payment
+    image: mystore-payment
+    container_name: mystore-payment
+    ports:
+      - "8091:8091"
+
+  redis-db:
+    image: redis:7.4.2-bookworm
+    container_name: redis-db
+    ports:
+      - "6379:6379"
