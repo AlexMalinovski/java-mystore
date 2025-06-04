@@ -15,4 +15,5 @@ public class CartDto {
     private Long id;
     private Boolean isAvailablePayment;
     private String systemMessage;
+    private Long userId;
 }

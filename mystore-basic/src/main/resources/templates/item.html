@@ -7,12 +7,20 @@
 </head>
 
 <body>
+    <!-- В href ссылка на логин -->
+    <a th:if="!${isAuthUser}" th:href="@{/login}" style="float:right; margin-left: 20px;">
+        <b>ВХОД&cudarrr;</b>
+    </a>
+    <!-- В href ссылка на логаут -->
+    <a th:if="${isAuthUser}" th:href="@{/logout}" style="float:right; margin-left: 20px;">
+        <b><span th:text="${userName}"></span>&cudarrr;</b>
+    </a>
     <!-- В href ссылка на страницу заказов -->
-    <a th:href="@{/orders}" style="float:right;">
+    <a th:if="${isAuthUser}" th:href="@{/orders}" style="float:right;">
         <b>ЗАКАЗЫ &cudarrr;</b>
     </a>
     <!-- В href ссылка на корзину -->
-    <a th:href="@{/cart}" style="float:right;">
+    <a th:if="${isAuthUser}" th:href="@{/cart}" style="float:right;">
         <b>КОРЗИНА &cudarrr;</b>
     </a>
     <!-- В href ссылка на главную страницу -->
@@ -38,7 +46,7 @@
 		В action ссылка на изменение количества товара в корзине.
 		Передается параметр запроса action=[minus|plus]
 	    -->
-        <form th:object="${cartAction}" th:action="@{/cart/{itemId}(itemId=${item.getId()})}" method="POST">
+        <form th:if="${isAuthUser}" th:object="${cartAction}" th:action="@{/cart/{itemId}(itemId=${item.getId()})}" method="POST">
             <input id="source" type="hidden" name="source" th:value="${'/items/' + (item.getId())}">
             <button name="action" value="minus">-</button>
             <!-- В text количество товара в корзине -->

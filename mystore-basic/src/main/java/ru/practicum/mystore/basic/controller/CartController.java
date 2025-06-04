@@ -1,6 +1,7 @@
 package ru.practicum.mystore.basic.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,21 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
+
+
+    @ModelAttribute("userName")
+    public Mono<String> getUserName() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().getName())
+                .switchIfEmpty(Mono.just("Guest"));
+    }
+
+    @ModelAttribute("isAuthUser")
+    public Mono<Boolean> getIsAuthUser() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().isAuthenticated())
+                .switchIfEmpty(Mono.just(Boolean.FALSE));
+    }
 
     @PostMapping(StoreUrls.Cart.ItemId.FULL)
     Mono<String> cartAction(@ModelAttribute CartAction cartAction, @PathVariable long itemId, Model model) {

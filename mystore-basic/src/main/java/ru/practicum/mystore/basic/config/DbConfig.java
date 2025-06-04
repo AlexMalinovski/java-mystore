@@ -5,10 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.practicum.mystore.basic.data.constant.OrderStatus;
+import ru.practicum.mystore.basic.data.entity.AppUser;
 import ru.practicum.mystore.basic.data.entity.Item;
 import ru.practicum.mystore.basic.data.entity.Order;
 import ru.practicum.mystore.basic.data.entity.OrderItem;
+import ru.practicum.mystore.basic.repositories.AppUserRepository;
 import ru.practicum.mystore.basic.repositories.ItemRepository;
 import ru.practicum.mystore.basic.repositories.OrderItemRepository;
 import ru.practicum.mystore.basic.repositories.OrderRepository;
@@ -22,6 +25,8 @@ public class DbConfig {
     private final ItemRepository itemRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final AppUserRepository appUserRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Bean
     ApplicationRunner initDb() {
@@ -29,13 +34,18 @@ public class DbConfig {
             orderItemRepository.deleteAll().block();
             orderRepository.deleteAll().block();
             itemRepository.deleteAll().block();
+            appUserRepository.deleteAll().block();
+
+            AppUser user1 = AppUser.builder().login("demo").password(passwordEncoder.encode("demo")).build();
+            AppUser user2 = AppUser.builder().login("user").password(passwordEncoder.encode("user")).build();
+            appUserRepository.saveAll(List.of(user1, user2)).blockLast();
 
             Item item1 = Item.builder().name("item2").description("description2").price(300L).build();
             Item item2 = Item.builder().name("item1").description("description1").price(500L).build();
             Item item3 = Item.builder().name("item3").description("description3").price(100L).build();
             itemRepository.saveAll(List.of(item1, item2, item3)).blockLast();
 
-            Order order1 = Order.builder().status(OrderStatus.NEW).build();
+            Order order1 = Order.builder().status(OrderStatus.NEW).userId(user1.getId()).build();
             orderRepository.saveAll(List.of(order1)).blockLast();
 
             OrderItem orderItem1 = OrderItem.builder()

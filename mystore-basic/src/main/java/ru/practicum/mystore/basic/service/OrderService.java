@@ -6,7 +6,7 @@ import ru.practicum.mystore.basic.data.dto.OrderDto;
 import ru.practicum.mystore.basic.data.entity.Order;
 
 public interface OrderService {
-    Mono<Order> getOrCreateOrder(Long orderId);
+    Mono<Order> getOrCreateOrder(Long orderId, String login);
 
     Mono<Order> getOrderWithItemsById(long orderId);
 

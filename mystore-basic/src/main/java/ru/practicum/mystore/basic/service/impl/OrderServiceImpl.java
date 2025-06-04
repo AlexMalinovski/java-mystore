@@ -2,6 +2,7 @@ package ru.practicum.mystore.basic.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,10 +10,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.practicum.mystore.basic.data.constant.OrderStatus;
 import ru.practicum.mystore.basic.data.dto.OrderDto;
+import ru.practicum.mystore.basic.data.entity.AppUser;
 import ru.practicum.mystore.basic.data.entity.Item;
 import ru.practicum.mystore.basic.data.entity.Order;
 import ru.practicum.mystore.basic.data.entity.OrderItem;
 import ru.practicum.mystore.basic.exception.NotFoundException;
+import ru.practicum.mystore.basic.repositories.AppUserRepository;
 import ru.practicum.mystore.basic.repositories.ItemRepository;
 import ru.practicum.mystore.basic.repositories.OrderItemRepository;
 import ru.practicum.mystore.basic.repositories.OrderRepository;
@@ -36,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final ItemRepository itemRepository;
     private final OrderMapper orderMapper;
     private final PaymentControllerApi paymentControllerApiClient;
+    private final AppUserRepository appUserRepository;
 
     private Mono<Order> findOrderByIdFetchItems(Long id) {
         Mono<Map<Long, Item>> items = itemRepository.findAllById(
@@ -61,12 +65,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public Mono<Order> getOrCreateOrder(Long orderId) {
+    public Mono<Order> getOrCreateOrder(Long orderId, String login) {
 
         return Mono.justOrEmpty(orderId)
                 .flatMap(orderRepository::findById)
-                .switchIfEmpty(orderRepository.save(
-                        Order.builder().status(OrderStatus.NEW).build()));
+                .switchIfEmpty(appUserRepository.findOneByLogin(login)
+                        .map(appUser -> Order.builder().status(OrderStatus.NEW).userId(appUser.getId()).build())
+                        .flatMap(orderRepository::save)
+                );
     }
 
     @Override
@@ -90,7 +96,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Flux<OrderDto> getAllOrders() {
-        return orderRepository.findAllFetchItems()
+        Mono<Long> userId = ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().getName())
+                .flatMap(appUserRepository::findOneByLogin)
+                .map(AppUser::getId);
+
+        return userId.flux()
+                .flatMap(orderRepository::findAllFetchItems)
                 .map(orderMapper::toOrderDto);
     }
 

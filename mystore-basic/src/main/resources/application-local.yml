@@ -12,13 +12,13 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://localhost:8080/realms/master # Адрес сервера авторизации для получения токена
+            issuer-uri: http://localhost:8080/realms/my-store # Адрес сервера авторизации для получения токена
         registration:
           mystore:
             authorizationGrantType: client_credentials
             provider: keycloak
             client-id: mystore
-            client-secret: cznQEDKlvjyPzSBYPzKuEMPgUnZdzOFy
+            client-secret: PGFL4KWeBT8SpnTTqs2CuUrw7bnvPlqE
             clientAuthenticationMethod: client_secret_post # Способ передачи секрета
             scope: profile
 

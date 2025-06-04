@@ -31,6 +31,9 @@ public class Order {
     @Column("status")
     private OrderStatus status;
 
+    @Column("user_id")
+    private Long userId;
+
     @Transient
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();

@@ -8,4 +8,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/master
+          issuer-uri: "http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}/realms/my-store"

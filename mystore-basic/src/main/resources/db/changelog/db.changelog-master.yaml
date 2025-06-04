@@ -1,4 +1,7 @@
 databaseChangeLog:
+  #Table users
+  - include: { relativeToChangelogFile: true, file: changeset/users/users.yaml }
+
   #Table items
   - include: { relativeToChangelogFile: true, file: changeset/items/items.yaml }
 

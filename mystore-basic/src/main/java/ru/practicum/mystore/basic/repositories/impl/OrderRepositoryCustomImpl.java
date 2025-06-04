@@ -43,11 +43,12 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     }
 
     @Override
-    public Flux<Order> findAllFetchItems() {
+    public Flux<Order> findAllFetchItems(Long userId) {
         return template.getDatabaseClient().sql(
-                        "SELECT o.id, o.status, oi.item_qty, oi.item_price, oi.item_id, i.name " +
+                        "SELECT o.user_id, o.id, o.status, oi.item_qty, oi.item_price, oi.item_id, i.name " +
                                 "FROM orders o LEFT JOIN orders_items oi ON o.id = oi.order_id " +
-                                "LEFT JOIN items i ON oi.item_id = i.id WHERE oi.item_qty > 0")
+                                "LEFT JOIN items i ON oi.item_id = i.id WHERE oi.item_qty > 0 and o.user_id = :id")
+                .bind("id", userId)
                 .map(((row, rowMetadata) -> QueryResult.builder()
                         .id(row.get("id", Long.class))
                         .status(OrderStatus.valueOf(row.get("status", String.class)))
