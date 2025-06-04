@@ -2,9 +2,11 @@ package ru.practicum.mystore.basic.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +22,21 @@ import ru.practicum.mystore.basic.service.OrderService;
 public class OrderController {
     private final OrderService orderService;
     private final CartService cartService;
+
+
+    @ModelAttribute("userName")
+    public Mono<String> getUserName() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().getName())
+                .switchIfEmpty(Mono.just("Guest"));
+    }
+
+    @ModelAttribute("isAuthUser")
+    public Mono<Boolean> getIsAuthUser() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().isAuthenticated())
+                .switchIfEmpty(Mono.just(Boolean.FALSE));
+    }
 
     @PostMapping(StoreUrls.Orders.FULL)
     Mono<String> placeOrder(Model model, SessionStatus status) {

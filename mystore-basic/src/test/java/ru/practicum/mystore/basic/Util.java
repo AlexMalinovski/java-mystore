@@ -16,6 +16,7 @@ public class Util {
     public static final int ITEM_A_QTY = 1;
     public static final String ITEM_A_NAME = "Item a";
     public static final String ITEM_A_DESCRIPTION = "Description a";
+    public static final Long USER_ID = 100L;
 
     public Item aItem() {
         return Item.builder()
@@ -44,10 +45,11 @@ public class Util {
         );
     }
 
-    public Order aOrder() {
+    public Order aOrder(Long userId) {
         return Order.builder()
                 .orderItems(aOrderItems())
                 .status(OrderStatus.NEW)
+                .userId(userId)
                 .build();
     }
 }

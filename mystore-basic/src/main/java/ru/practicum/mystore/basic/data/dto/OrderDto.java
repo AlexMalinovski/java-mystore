@@ -14,4 +14,5 @@ public class OrderDto {
     private final OrderStatus status;
     private final Long id;
     private final Long cost;
+    private Long userId;
 }

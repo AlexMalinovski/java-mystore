@@ -2,6 +2,7 @@ package ru.practicum.mystore.basic.controller;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.practicum.mystore.basic.data.constant.OrderStatus;
@@ -11,13 +12,15 @@ import ru.practicum.mystore.basic.data.dto.OrderDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 
 class OrderControllerItTest extends AbstractControllerTest {
 
     @Test
     @SneakyThrows
+    @WithMockUser(username = "user")
     void placeOrder() {
-        webTestClient.post()
+        webTestClient.mutateWith(csrf()).post()
                 .uri(StoreUrls.Orders.FULL)
                 .exchange()
                 .expectStatus().is3xxRedirection()
@@ -26,6 +29,7 @@ class OrderControllerItTest extends AbstractControllerTest {
 
     @Test
     @SneakyThrows
+    @WithMockUser(username = "user")
     void getOrderById() {
         when(cartService.getOrderCart(any())).thenReturn(Mono.just(CartDto.builder().status(OrderStatus.NEW).build()));
         webTestClient.get()
@@ -38,6 +42,7 @@ class OrderControllerItTest extends AbstractControllerTest {
 
     @Test
     @SneakyThrows
+    @WithMockUser(username = "user")
     void getOrders() {
         when(orderService.getAllOrders()).thenReturn(Flux.just(OrderDto.builder().build()));
         webTestClient.get()

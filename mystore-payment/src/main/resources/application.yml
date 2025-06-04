@@ -4,3 +4,8 @@ server:
 spring:
   application:
     name: payment
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}/realms/my-store"

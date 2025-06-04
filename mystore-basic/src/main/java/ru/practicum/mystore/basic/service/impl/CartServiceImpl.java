@@ -1,7 +1,9 @@
 package ru.practicum.mystore.basic.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -32,6 +34,7 @@ import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class CartServiceImpl implements CartService {
     private final OrderService orderService;
     private final OrderItemService orderItemService;
@@ -52,7 +55,10 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public Mono<Long> handleCartAction(CartAction cartAction, long itemId, Long orderId) {
-        Mono<Order> order = orderService.getOrCreateOrder(orderId);
+        Mono<Order> order = ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().getName())
+                .flatMap(login -> orderService.getOrCreateOrder(orderId, login));
+//        Mono<Order> order = orderService.getOrCreateOrder(orderId);
         Mono<Item> item = itemService.findById(itemId)
                 .switchIfEmpty(
                         Mono.error(new BadRequestException(String.format("Товар id=%d не найден в БД", itemId))));
@@ -95,8 +101,9 @@ public class CartServiceImpl implements CartService {
                 .map(orderItemMapper::toCartDto)
 
 
-
-                .zipWith(balanceControllerApiClient.getBalance().onErrorReturn(new BalanceDto()))
+                .zipWith(balanceControllerApiClient.getBalance()
+                        .doOnError(e -> log.error("Ошибка при работе с сервисом платежей:{}", e.getMessage(), e))
+                        .onErrorReturn(new BalanceDto()))
                 .map(t -> setPaymentAvailable(t.getT1(), t.getT2()));
     }
 

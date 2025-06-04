@@ -5,5 +5,5 @@ import ru.practicum.mystore.basic.data.entity.Order;
 
 public interface OrderRepositoryCustom {
 
-    Flux<Order> findAllFetchItems();
+    Flux<Order> findAllFetchItems(Long userId);
 }

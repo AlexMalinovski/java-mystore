@@ -13,16 +13,20 @@ class OrderServiceImplItTest extends AbstractServiceTest {
 
     @Test
     void getOrCreateOrder_whenOrderExist_thenReturnThis() {
-        Order order = orderRepository.save(Util.aOrder()).block();
+        String login = "user";
+        Long userId = appUserRepository.findOneByLogin(login).block().getId();
+        Order order = orderRepository.save(Util.aOrder(userId)).block();
 
-        orderService.getOrCreateOrder(order.getId()).subscribe(actual -> {
+        orderService.getOrCreateOrder(order.getId(), login).subscribe(actual -> {
             assertEquals(order, actual);
         });
     }
 
     @Test
     void getOrCreateOrder_whenOrderNotExist_thenCreate() {
-        var order = orderService.getOrCreateOrder(9999L).block();
+        String login = "user";
+
+        var order = orderService.getOrCreateOrder(9999L, login).block();
 
         orderRepository.existsById(order.getId()).subscribe(Assertions::assertTrue);
     }

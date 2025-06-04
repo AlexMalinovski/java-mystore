@@ -3,6 +3,7 @@ package ru.practicum.mystore.basic.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +50,25 @@ public class MainController {
         return dto;
     }
 
+    @ModelAttribute("userName")
+    public Mono<String> getUserName() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().getName())
+                .switchIfEmpty(Mono.just("Guest"));
+    }
+
+    @ModelAttribute("isAuthUser")
+    public Mono<Boolean> getIsAuthUser() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().isAuthenticated())
+                .switchIfEmpty(Mono.just(Boolean.FALSE));
+    }
+
+    @GetMapping(StoreUrls.FULL)
+    public Mono<String> defaultRedirect() {
+        return Mono.just("redirect:" + StoreUrls.Main.FULL);
+    }
+
     @PostMapping(path = StoreUrls.Main.FULL, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public Mono<String> setItemFilter(@ModelAttribute MainDto mainDto) {
         return Mono.just("redirect:" + StoreUrls.Main.FULL);
@@ -61,6 +81,7 @@ public class MainController {
         final int pageNumber = mainDto.getPageNumber();
         final String nameFilter = Optional.ofNullable(mainDto.getNameSubstring()).orElse("");
         final SortType sortType = Optional.ofNullable(mainDto.getSort()).orElse(SortType.NO);
+
 
         return itemService.findPaginated(PageRequest.of(pageNumber - 1, pageSize), nameFilter, sortType)
                 .flatMap(page -> {

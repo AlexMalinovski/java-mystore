@@ -3,6 +3,8 @@ package ru.practicum.mystore.basic.controller;
 public interface StoreUrls {
     String ROOT = "";
 
+    String FULL = ROOT + "/";
+
     interface Main {
         String PART = "main";
         String FULL = ROOT + "/" + PART;

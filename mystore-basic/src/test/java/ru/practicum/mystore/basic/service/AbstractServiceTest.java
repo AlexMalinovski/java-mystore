@@ -2,6 +2,7 @@ package ru.practicum.mystore.basic.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.practicum.mystore.basic.AbstractIntegrationTest;
+import ru.practicum.mystore.basic.repositories.AppUserRepository;
 import ru.practicum.mystore.basic.repositories.ItemRepository;
 import ru.practicum.mystore.basic.repositories.OrderItemRepository;
 import ru.practicum.mystore.basic.repositories.OrderRepository;
@@ -27,4 +28,7 @@ public class AbstractServiceTest extends AbstractIntegrationTest {
 
     @Autowired
     protected CartService cartService;
+
+    @Autowired
+    protected AppUserRepository appUserRepository;
 }

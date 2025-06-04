@@ -3,6 +3,7 @@ package ru.practicum.mystore.basic.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +23,21 @@ import ru.practicum.mystore.basic.service.ItemService;
 public class ItemController {
     private final ItemService itemService;
     private final CartService cartService;
+
+
+    @ModelAttribute("userName")
+    public Mono<String> getUserName() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().getName())
+                .switchIfEmpty(Mono.just("Guest"));
+    }
+
+    @ModelAttribute("isAuthUser")
+    public Mono<Boolean> getIsAuthUser() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication().isAuthenticated())
+                .switchIfEmpty(Mono.just(Boolean.FALSE));
+    }
 
     @GetMapping(StoreUrls.Items.ItemId.FULL)
     public Mono<String> getItem(@PathVariable long itemId, Model model) {

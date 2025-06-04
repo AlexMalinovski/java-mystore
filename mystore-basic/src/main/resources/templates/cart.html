@@ -7,8 +7,12 @@
 </head>
 
 <body>
+<!-- В href ссылка на логаут -->
+<a th:if="${isAuthUser}" th:href="@{/logout}" style="float:right; margin-left: 20px;">
+    <b><span th:text="${userName}"></span>&cudarrr;</b>
+</a>
 <!-- В href ссылка на страницу заказов -->
-<a th:href="@{/orders}" style="float:right;">
+<a th:if="${isAuthUser}" th:href="@{/orders}" style="float:right;">
     <b>ЗАКАЗЫ &cudarrr;</b>
 </a>
 <!-- В href ссылка на главную страницу -->
@@ -44,7 +48,7 @@
                     		В action ссылка на изменение количества товара в корзине.
                     		Передается параметр запроса action=[minus|plus]
                     	-->
-                        <form th:object="${cartAction}" th:action="@{/cart/{itemId}(itemId=${item.getId()})}" method="POST">
+                        <form th:if="${isAuthUser}" th:object="${cartAction}" th:action="@{/cart/{itemId}(itemId=${item.getId()})}" method="POST">
                             <input id="source" type="hidden" name="source" value="/cart">
                             <button name="action" value="minus">-</button>
                             <!-- В text количество товара в корзине -->
@@ -69,7 +73,7 @@
             	В action ссылка на страницу оформления заказа.
             	В if true, если в корзине есть товары, false, если нет
             -->
-            <form th:action="@{/orders}" method="post" th:if="${!cart.getItems().isEmpty()}">
+            <form th:action="@{/orders}" method="post" th:if="${!cart.getItems().isEmpty() && isAuthUser}">
                 <button th:if="${cart.getIsAvailablePayment()}">Купить</button>
                 <p th:text="${cart.getSystemMessage()}"></p>
             </form>
